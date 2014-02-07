@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Canvas Template</title>
+	<link rel="stylesheet" type="text/css" href="../style.css" />
+</head>
+
+<body>
+
+<canvas width="800" height="600" id="canvas">Your browswer doesn't support canvas.</canvas>
+
+<script src="../lib/ball.js" type="text/javascript" lang="javascript"></script>
+<script src="../lib/utils.js" type="text/javascript"></script>
+<script type="text/javascript" lang="javascript">
+
+
+ball1 = new Ball(ctx,"#ff88aa",10);
+var X = 0,Y = 0, dx,dy;
+
+var reqID;
+ctx.fillStyle = "#FFFFFF";
+
+var k = 0.055; //spring constant
+var b = 0.061; //damping constant
+
+window.onload = function (){
+	ball1.draw();
+};
+
+function start() {
+	reqID = reqAnimFrame(start);
+
+	ctx.fillRect(0,0,can.width,can.height);
+	dx = X - ball1.x,
+	dy = Y - ball1.y;
+	ball1.vx *= (k/b);
+	ball1.vy *= (k/b);
+	ball1.ax = k*dx;
+	ball1.ay = k*dy;
+
+	ctx.beginPath(); 
+	ctx.moveTo(ball1.x, ball1.y); 
+	ctx.lineTo(X, Y); 
+	ctx.stroke();	
+
+	ball1.updatePosition();
+	ball1.draw();				
+}
+
+
+
+//var label = document.getElementById("label");
+can.addEventListener("mousemove", function(e){
+	//label.style.color = 'black';
+	X = e.clientX - can.offsetLeft + 1;
+	Y = e.clientY - can.offsetTop + 1;
+	//label.innerHTML = "X: " + X + "</br>Y: " + Y;
+});
+can.addEventListener("click", function(e){
+	stop();
+	
+	start();
+});
+
+/*document.getElementById("run").addEventListener("click",function(){
+	stop();	
+});*/
+
+function stop(){	
+	cancelAnim(reqID);
+	//label.style.color = 'red';
+	//label.innerHTML += "<br /> Stoped!";
+}
+</script>
+
+</body>
+</html>
