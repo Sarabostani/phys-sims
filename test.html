@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="canvas" width="800" height="600" style="border:1px solid black"></canvas>
+
+<script src="lib/utils.js"></script>
+<script>
+
+(function(){
+	paint();
+	document.getElementById('canvas').addEventListener('click',paint);	
+	/*ctx.beginPath();
+	ctx.moveTo(10,18);
+	ctx.lineTo(30,18);
+	ctx.stroke();*/
+})();
+var zfactor = 0.9;
+var scale = 1;
+function paint(){
+	
+	ctx.fillStyle= "white";
+	ctx.fillRect(0,0,can.width,can.height);
+	
+	ctx.fillStyle = 'black';
+	
+	ctx.save();
+	
+	//zoom to center
+	scale /= zfactor;
+	ctx.translate(-(can.width*(scale-1)/2),-(can.height*(scale-1)/2));
+	ctx.scale(scale,scale);	
+		
+	
+	ctx.beginPath();
+	ctx.moveTo(400,0);
+	ctx.lineTo(400,600);
+	ctx.stroke();
+	
+	ctx.beginPath();
+	ctx.moveTo(0,300);
+	ctx.lineTo(800,300);
+	ctx.stroke();
+	
+	ctx.fillStyle = "#acabff";
+	ctx.beginPath();
+	ctx.arc(400,340, 40, 0, 2*Math.PI)
+	ctx.fill();
+	
+	ctx.fillRect(459,300,20,20);
+	
+	
+	ctx.restore();
+}
+
+function zoom(){
+	//ctx.save();
+	ctx.translate(-400,-300);
+	scale /= scaleMult;
+	ctx.scale(scale,scale);
+}
+
+</script>
+</body>
+
+</html>
