@@ -3,42 +3,111 @@
 <head>
 <title>Newton Cannon</title>
 <link rel="stylesheet" type="text/css" href="../style.css" />
-
+<style>
+#zoomin{
+	width:30px;
+	position:absolute;
+	left:770px;
+	top:.5em;
+}
+#zoomout{
+	width:30px;
+	position:absolute;
+	left:770px;
+	top:2.5em;
+}
+</style>
 </head>
 
 <body>
+<div id="container">
+	<input id="zoomin" type="button" value="+" />
+	<input id="zoomout" type="button" value="-" />
+	<canvas width="800" height="600" id="canvas">Your browser doesn't support canvas.</canvas>
+</div>
 
-<canvas width="800" height="600" id="canvas">Your browser doesn't support canvas.</canvas>
-<script language="javascript" src="../lib/utils.js"></script>
-<script language="javascript">
+<script src="../lib/utils.js"></script>
+<script src="../lib/ball.js"></script>
 
-var VX = 10.0 , VY = -5.0 , X = 20 , Y = 40, AX=0.0 , AY = 0.45; //consts
+<script>
+var earth = {
+	radius : 100,
+	xpos : 400,
+	ypos : 300
+};
 
-var x = 1, y = 1;
-var vx = VX, vy = VY;
-var ax = AX, ay = AY;
+var ball = new Ball('red',1);
+ball.x = earth.xpos; ball.y = earth.ypos - earth.radius - ball.radius - 1;
 
-function start() { 		
-	//reqID = reqAnimFrame(start);			  
-	//animation code...
-	
-	ctx.fillStyle="#ffffff";
-	ctx.fillRect(0,0,can.width,can.height);
-	
-	ctx.fillStyle = "#55aaee";
-	ctx.beginPath();
-	ctx.scale(x,y);
-	ctx.arc(400, 300, 80, 0, 2*Math.PI);
-	ctx.fill();
-	x += 0.0002;
-	y += 0.0002;
+
+
+var point = new Point(earth.xpos, earth.ypos - earth.radius);
+var scaleFactor = 1.9;
+var zoomLimit = 1;
+
+document.getElementById('zoomin').addEventListener('click',zoomIn);
+document.getElementById('zoomout').addEventListener('click',zoomOut);
+
+function zoomIn(){
+	if(zoomLimit < 10){
+		zoomToPoint(point,scaleFactor,'in');
+		++zoomLimit;
+	}
+}
+function zoomOut(){
+	if(zoomLimit > 1){
+		zoomToPoint(point,scaleFactor,'out');
+		--zoomLimit;
+	}
 }
 
-//setInterval(start,60);
-
 window.onload = function(){
-	setTimeout(start,430);
+	
+	paint();
+	//document.getElementById('canvas').addEventListener('mousewheel',handleScroll);
+		
 };
+
+
+
+function paint(){
+
+	//ctx.fillStyle = '#eefffe';
+	//ctx.fillRect(0,0,can.width,600);
+	ctx.clearRect(0,0,can.width,can.height);
+	
+	
+	ctx.fillStyle = "#acabff";
+	ctx.beginPath();
+	ctx.arc(earth.xpos,earth.ypos, earth.radius, 0, 2*Math.PI)
+	ctx.fill();
+	
+	//ball.radius /= Math.abs(delta);
+	ball.radius = 2/zoomLimit;
+	ball.draw();
+	
+	//ctx.fillRect(459,300,20,20);
+
+}
+
+
+lowZoom = 0;
+highZoom = 30;
+var delta = 1.0;
+function handleScroll(evt){
+
+	delta = evt.wheelDelta ? evt.wheelDelta/40 : evt.detail ? -evt.detail : 0;
+	
+	if(delta < 0 && zoomLimit > lowZoom)
+		--zoomLimit;
+	else if(delta > 0 && zoomLimit < highZoom)
+		++zoomLimit;
+	
+	if( zoomLimit > lowZoom && zoomLimit < highZoom){
+		if (delta) zoomToPoint(delta, point);
+		paint();
+	}
+}
 
 </script>
 
