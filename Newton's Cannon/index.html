@@ -25,6 +25,8 @@
 </head>
 
 <body>
+<img id="earth" src="earth.png" style="width:500px;visibility:hidden;display:none" width="500px" />
+<img id="mountain" src="mountain.png" style="width:500px;visibility:hidden;display:none" />
 <div id="container">
 	<input id="zoomin" type="button" value="+" />
 	<input id="zoomout" type="button" value="-" />
@@ -47,6 +49,8 @@ ball.x = earth.center.x - 10; ball.y = earth.center.y - earth.radius - ball.radi
 ball.vx = 1;
 ball.ay = 0.005;
 
+var earthImg = document.getElementById("earth");
+var mountain = document.getElementById("mountain");
 
 var point = new Point(earth.center.x, earth.center.y - earth.radius - 4);
 
@@ -57,7 +61,7 @@ var trace = new Array();
 
 document.getElementById('zoomin').addEventListener('click',zoomIn);
 document.getElementById('zoomout').addEventListener('click',zoomOut);
-document.getElementById('start').addEventListener('click',startAnim);
+document.getElementById('start').addEventListener('click',start);
 
 function zoomIn(){
 	if(zoomLimit < 11){
@@ -74,18 +78,20 @@ function zoomOut(){
 
 //document.getElementById("canvas").addEventListener('click', startAnim);
 window.onload = function(){
-	
-	//startAnim();
 	paint();
 	console.log(distance(ball.center,earth.center));
 };
 
+function start(){
+	animating = true;
+	startAnim();
+}
 function startAnim(){
 	reqAnimID = reqAnimFrame(startAnim);	
 	paint();
 }
 
-var animating = true;
+var animating = false;
 
 /*setInterval(function(){
 	if(animating)
@@ -97,15 +103,18 @@ var animating = true;
 var i = 0;
 function paint(){
 
-	//ctx.fillStyle = '#fff';
-	//ctx.fillRect(0,0,can.width, can.height);
-	ctx.clearRect(0,0,can.width,can.height);
+	ctx.fillStyle = '#eff';
+	ctx.fillRect(0,0,can.width, can.height);
 	
+	//ctx.clearRect(0,0,can.width,can.height);
 	
-	ctx.fillStyle = "#acabff";
+	ctx.drawImage(earthImg,250,60,400,400);
+	ctx.drawImage(mountain,425,43,20,20);
+	
+	/*ctx.fillStyle = "#acabff";
 	ctx.beginPath();
 	ctx.arc(earth.center.x,earth.center.y, earth.radius, 0, 2*Math.PI)
-	ctx.fill();
+	ctx.fill();*/
 	
 	ball.updatePosition();	
 	ball.draw();
@@ -120,7 +129,7 @@ function paint(){
 		ctx.restore();
 	}*/
 	
-	if(++i % 2 == 0 ){
+	if(animating){
 		trace.push(new Point(ball.x,ball.y));
 	}
 	
@@ -132,7 +141,7 @@ function paint(){
 	});
 	
 	
-	if(distance(ball.center,earth.center) < earth.radius || ball.outOfCanvas() && animating){
+	if((distance(ball.center,earth.center) < earth.radius || ball.outOfCanvas() ) && animating == true){
 		cancelAnim(reqAnimID);
 		animating = false;
 		console.log('stopped , #of points = ' + trace.length);
