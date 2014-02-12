@@ -7,13 +7,13 @@
 #zoomin{
 	width:30px;
 	position:absolute;
-	left:770px;
+	left:870px;
 	top:.5em;
 }
 #zoomout{
 	width:30px;
 	position:absolute;
-	left:770px;
+	left:870px;
 	top:2.5em;
 }
 </style>
@@ -23,7 +23,7 @@
 <div id="container">
 	<input id="zoomin" type="button" value="+" />
 	<input id="zoomout" type="button" value="-" />
-	<canvas width="800" height="600" id="canvas">Your browser doesn't support canvas.</canvas>
+	<canvas width="900" height="500" id="canvas">Your browser doesn't support canvas.</canvas>
 </div>
 
 <script src="../lib/utils.js"></script>
@@ -31,17 +31,17 @@
 
 <script>
 var earth = {
-	radius : 100,
-	xpos : 400,
-	ypos : 300
+	radius : 200,
+	xpos : 450,
+	ypos : 250
 };
 
-var ball = new Ball('red',1);
-ball.x = earth.xpos; ball.y = earth.ypos - earth.radius - ball.radius - 1;
+var ball = new Ball('red',0.5);
+ball.x = earth.xpos; ball.y = earth.ypos - earth.radius - ball.radius - 6;
 
 
 
-var point = new Point(earth.xpos, earth.ypos - earth.radius);
+var point = new Point(earth.xpos, earth.ypos - earth.radius - 6);
 var scaleFactor = 1.9;
 var zoomLimit = 1;
 
@@ -83,7 +83,7 @@ function paint(){
 	ctx.fill();
 	
 	//ball.radius /= Math.abs(delta);
-	ball.radius = 2/zoomLimit;
+	//ball.radius = 2/zoomLimit;
 	ball.draw();
 	
 	//ctx.fillRect(459,300,20,20);
