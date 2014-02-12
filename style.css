@@ -1,7 +1,9 @@
 body{
 	padding:0px;
 	margin:0px;
+	background:black;
 }
 #canvas{
 	padding:0; margin:auto; border: 1px solid #ccc;
+	background:white;
 }

@@ -16,6 +16,11 @@
 	left:870px;
 	top:2.5em;
 }
+#start{
+	position:absolute;
+	left:855px;
+	top:5.0em;
+}
 </style>
 </head>
 
@@ -23,6 +28,7 @@
 <div id="container">
 	<input id="zoomin" type="button" value="+" />
 	<input id="zoomout" type="button" value="-" />
+	<input id="start" type="button" value="Start" />
 	<canvas width="900" height="500" id="canvas">Your browser doesn't support canvas.</canvas>
 </div>
 
@@ -32,62 +38,105 @@
 <script>
 var earth = {
 	radius : 200,
-	xpos : 450,
-	ypos : 250
+	center : new Point(450,250)
 };
 
-var ball = new Ball('red',0.5);
-ball.x = earth.xpos; ball.y = earth.ypos - earth.radius - ball.radius - 6;
+var ball = new Ball('red',0.2);
+ball.x = earth.center.x - 10; ball.y = earth.center.y - earth.radius - ball.radius - 5;
+
+ball.vx = 1;
+ball.ay = 0.005;
 
 
+var point = new Point(earth.center.x, earth.center.y - earth.radius - 4);
 
-var point = new Point(earth.xpos, earth.ypos - earth.radius - 6);
-var scaleFactor = 1.9;
+var scaleFactor = 1.8;
 var zoomLimit = 1;
+
+var trace = new Array();
 
 document.getElementById('zoomin').addEventListener('click',zoomIn);
 document.getElementById('zoomout').addEventListener('click',zoomOut);
+document.getElementById('start').addEventListener('click',startAnim);
 
 function zoomIn(){
-	if(zoomLimit < 10){
+	if(zoomLimit < 11){
 		zoomToPoint(point,scaleFactor,'in');
-		++zoomLimit;
+		++zoomLimit;	
 	}
 }
 function zoomOut(){
 	if(zoomLimit > 1){
 		zoomToPoint(point,scaleFactor,'out');
-		--zoomLimit;
+		--zoomLimit;		
 	}
 }
 
+//document.getElementById("canvas").addEventListener('click', startAnim);
 window.onload = function(){
 	
+	//startAnim();
 	paint();
-	//document.getElementById('canvas').addEventListener('mousewheel',handleScroll);
-		
+	console.log(distance(ball.center,earth.center));
 };
 
+function startAnim(){
+	reqAnimID = reqAnimFrame(startAnim);	
+	paint();
+}
 
+var animating = true;
 
+/*setInterval(function(){
+	if(animating)
+		//console.log('push');
+		points.push(new Point(ball.x,ball.y));
+		
+},100);*/
+
+var i = 0;
 function paint(){
 
-	//ctx.fillStyle = '#eefffe';
-	//ctx.fillRect(0,0,can.width,600);
+	//ctx.fillStyle = '#fff';
+	//ctx.fillRect(0,0,can.width, can.height);
 	ctx.clearRect(0,0,can.width,can.height);
 	
 	
 	ctx.fillStyle = "#acabff";
 	ctx.beginPath();
-	ctx.arc(earth.xpos,earth.ypos, earth.radius, 0, 2*Math.PI)
+	ctx.arc(earth.center.x,earth.center.y, earth.radius, 0, 2*Math.PI)
 	ctx.fill();
 	
-	//ball.radius /= Math.abs(delta);
-	//ball.radius = 2/zoomLimit;
+	ball.updatePosition();	
 	ball.draw();
 	
-	//ctx.fillRect(459,300,20,20);
-
+	/*for( i = 0; i < points.length - 1 ; i++){
+		ctx.save();
+		ctx.fillStyle= '#ff0000' ;
+		ctx.beginPath();
+		ctx.moveTo(points[i].x,points[i].y);
+		ctx.lineTo(points[i+1].x,points[i+1].y);
+		ctx.stroke();
+		ctx.restore();
+	}*/
+	
+	if(++i % 2 == 0 ){
+		trace.push(new Point(ball.x,ball.y));
+	}
+	
+	trace.forEach(function(pt){
+		ctx.save();
+		ctx.fillStyle = 'red';
+		ctx.fillRect(pt.x,pt.y,0.51,0.51);
+		ctx.restore();
+	});
+	
+	
+	if(distance(ball.center,earth.center) < earth.radius || ball.outOfCanvas() && animating){
+		cancelAnim(reqAnimID);
+		animating = false;
+		console.log('stopped , #of points = ' + trace.length);
+	}
 }
 
 
