@@ -7,19 +7,24 @@
 #zoomin{
 	width:30px;
 	position:absolute;
-	left:870px;
+	left:865px;
 	top:.5em;
 }
 #zoomout{
 	width:30px;
 	position:absolute;
-	left:870px;
+	left:865px;
 	top:2.5em;
 }
 #start{
 	position:absolute;
 	left:850px;
-	top:5.0em;
+	top:4.5em;
+}
+#reset{
+	position:absolute;
+	left:845px;
+	top:6.5em;
 }
 </style>
 </head>
@@ -31,8 +36,11 @@
 	<input id="zoomin" type="button" value="+" />
 	<input id="zoomout" type="button" value="-" />
 	<input id="start" type="button" value="Start" />
+	<input id="reset" type="button" value="Reset" />
 	<canvas width="900" height="500" id="canvas">Your browser doesn't support canvas.</canvas>
 </div>
+<label id="alpha"></label>
+
 
 <script src="../lib/utils.js"></script>
 <script src="../lib/ball.js"></script>
@@ -48,36 +56,47 @@ var earth = {
 	center : new Point(450,250)
 };
 
-var ball = new Ball('red',0.2);
+var ball = new Ball('red',0.5);
 
 var earthImg = document.getElementById("earth");
 var mountain = document.getElementById("mountain");
 
 var trace = new Array();
 
+var animating = false;
+var reqAnimID = null;
+
 function initValues(){
 
-	ball.x = earth.center.x - 10; 
-	ball.y = earth.center.y - earth.radius - ball.radius - 5;
+	ball.x = earth.center.x - 14; 
+	ball.y = earth.center.y - earth.radius - ball.radius - 16;
 
-	ball.vx = 1;
-	ball.ay = 0.005;
+	ball.vx = 1.4;	
+	ball.vy = 0;
+	ball.ax = 0;
+	ball.ay = 0;
+	
+	trace = new Array();
+	animating = false;
+	adjustBallAcceleration();
+	reqAnimID = null;
 }
 
 
 document.getElementById('zoomin').addEventListener('click',zoomIn);
 document.getElementById('zoomout').addEventListener('click',zoomOut);
 document.getElementById('start').addEventListener('click',start);
+document.getElementById('reset').addEventListener('click',reset);
 
-/**************
+/********************
 * HANDLING ZOOM
-****************/
-var zoomPoint = new Point(earth.center.x + 10, earth.center.y - earth.radius - 4);
+*********************/
+var zoomPoint = new Point(earth.center.x + 20, earth.center.y - earth.radius - 20);
 var scaleFactor = 1.8;
 var zoomLimit = 1;
 
 function zoomIn(){
-	if(zoomLimit < 8){
+	if(zoomLimit < 6){
 		zoomToPoint(zoomPoint,scaleFactor,'in');
 		++zoomLimit;	
 	}
@@ -89,9 +108,9 @@ function zoomOut(){
 	}
 }
 
-/**********
-* ANIMATION START/STOP
-***********/
+/*****************************
+* ANIMATION START/STOP/RESET
+******************************/
 
 window.onload = function(){
 	initValues();
@@ -99,11 +118,12 @@ window.onload = function(){
 	//console.log(distance(ball.center,earth.center));
 };
 
-var animating = false;
 
 function start(){
-	animating = true;
-	startAnimation();
+	if(!reqAnimID){
+		animating = true;
+		startAnimation();
+	}
 }
 function startAnimation(){
 	reqAnimID = reqAnimFrame(startAnimation);	
@@ -111,9 +131,18 @@ function startAnimation(){
 }
 
 function stopAnimation(){
-	cancelAnim(reqAnimID);
-	animating = false;
-	console.log('stopped , #of points = ' + trace.length);
+	if(reqAnimID){
+		cancelAnim(reqAnimID);
+		animating = false;
+		console.log('stopped , #of points = ' + trace.length);
+	}
+}
+
+function reset(){
+
+	stopAnimation();
+	initValues();
+	paint();
 }
 
 
@@ -126,16 +155,17 @@ function paint(){
 	ctx.fillRect(0,0,can.width, can.height);
 	
 	//ctx.clearRect(0,0,can.width,can.height);
-	
-	ctx.drawImage(earthImg,250,60,400,400);
-	ctx.drawImage(mountain,425,43,20,20);
-	
-	ball.updatePosition();	
-	ball.draw();
+	//drawing the earth. Images are drawn from upper left corner
+	ctx.drawImage(earthImg,earth.center.x - earth.radius,earth.center.y - earth.radius, earth.radius*2, earth.radius*2);
+	ctx.drawImage(mountain,425,earth.center.y - earth.radius - 16,20,20);
 	
 	if(animating){
+		adjustBallAcceleration();		
+		ball.updatePosition();	
 		trace.push(new Point(ball.x,ball.y));
 	}
+	
+	ball.draw();
 	
 	trace.forEach(function(pt){
 		ctx.save();
@@ -150,7 +180,27 @@ function paint(){
 	}
 }
 
+/**************
+* CALCULATIONS
+***************/
+var alpha = 0.0;
+var acceleration = 0.02;
+var alphalable = document.getElementById("alpha");
+function adjustBallAcceleration(){
+	alpha = angleBetween(ball.center, earth.center);
+	ball.ax = Math.cos(alpha)*acceleration;
+	ball.ay = Math.sin(alpha)*acceleration;
+	alphalable.innerHTML = alpha*180/(Math.PI) + "<br>" + ball.ax;
+}
 
+
+
+
+
+
+/********
+* Mouse scroll not used
+*********/
 lowZoom = 0;
 highZoom = 30;
 var delta = 1.0;
