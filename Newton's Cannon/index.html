@@ -1,50 +1,47 @@
 <!DOCTYPE html>
+<!-- 
+Herman Sarabostani
+email: sarabostani (at) outlook.com
+February, 2014
+ -->
 <html>
 <head>
 <title>Newton Cannon</title>
 <link rel="stylesheet" type="text/css" href="../style.css" />
 <style>
-#zoomin{
-	width:30px;
+input{
+	margin:2px;
+}
+h4{
+	margin:5px;padding:0;
+	width : 200px;
+}
+#rightPanel{
 	position:absolute;
 	left:865px;
 	top:.5em;
 }
-#zoomout{
-	width:30px;
-	position:absolute;
-	left:865px;
-	top:2.5em;
-}
+#zoomin{ width:30px; }
+#zoomout{ width:30px; }
 
-#speed{
+#leftPanel{
+	background:#fff;
 	position:absolute;
 	left:5px;
 	top:1em;
 	width:150px;
+	margin:0 10px;
+	padding:10px;
+	border:1px solid #aaf;
+}
+#speed{
+	width:150px;
+	max-height:1em;
 }
 #speedLabel{
-	position:absolute;
-	left:5px;
-	top:2.8em;
-	width:150px;
 	font-size:10pt;
 }
-#start{
-	position:absolute;
-	left:10px;
-	top:4.5em;
-}
-#stop{
-	position:absolute;
-	left:10px;
-	top:6.5em;
-}
-#reset{
-	position:absolute;
-	left:10px;
-	top:8.5em;
-}
+
 
 </style>
 </head>
@@ -53,13 +50,27 @@
 <img id="earth" src="earth.png" style="width:500px;visibility:hidden;display:none" width="500px" />
 <img id="mountain" src="mountain.png" style="width:500px;visibility:hidden;display:none" width="20px" />
 <div id="container">
-	<input id="zoomin" type="button" value="+" >
-	<input id="zoomout" type="button" value="-" >
-	<input id="speed" type="range" min="1" max="100" >
-	<label for="speed" id="speedLabel">Speed = 50 m/s</label>
-	<input id="start" type="button" value="Start" >
-	<input id="stop" type="button" value="Stop" >
-	<input id="reset" type="button" value="Reset" >	
+	<div id="rightPanel">
+		<input id="zoomin" type="button" value="+" ><br>
+		<input id="zoomout" type="button" value="-" >
+	</div>
+	<div id="leftPanel">
+	<a href="javascript:showHidePanel();">-</a>
+		<div id="leftControls">
+			<h4>Speed:</h4>
+			<input id="speed" type="range" value="20" min="0" max="100" >
+			<label for="speed" id="speedLabel">Speed = 50 m/s</label>
+			<h4>Height:</h4>
+			<input id="height" type="range" value="40" min="0" max="100" >
+			<label for="height" id="speedLabel">height = 50 m</label>
+			<h4>Angle:</h4>
+			<input id="angle" type="range" value="0" min="0" max="90" >
+			<label for="Angle" id="speedLabel">Angle = 50&deg;</label><br><br>
+			<input id="start" type="button" value="Start" >
+			<input id="stop" type="button" value="Pause" >
+			<input id="reset" type="button" value="Reset" >
+		</div>
+	</div>
 	<canvas width="900" height="500" id="canvas">Your browser doesn't support canvas.</canvas>
 </div>
 <!-- <label id="alpha"></label>
@@ -69,226 +80,15 @@
 <script src="../lib/ball.js"></script>
 <script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v5.0.1.min.js"></script>
 
+<script src="newtonCannon.js"></script>
 <script>
-
-/****************************
-* INITIALIZING VALUES AND VARIABLES
-******************************/
-
-var earth = {
-	radius : 200,
-	center : new Point(450,250),
-	draw : function(){
-			var x = this.center.x;
-			var y = this.center.y;
-			ctx.save();
-			var grad = ctx.createRadialGradient(x, y, this.radius/5,x, y, this.radius*2);
-			// light blue
-			grad.addColorStop(0, '#8ED6FF');
-			// dark blue
-			grad.addColorStop(1, '#004CB3');			
-			ctx.fillStyle = grad;
-			ctx.beginPath();
-			ctx.arc(this.center.x,this.center.y,this.radius, 0 , 2*Math.PI);
-			ctx.fill();
-			
-			ctx.restore();	
-			
-		}
-};
-
-var ball = new Ball('black',2);
-var angle = 0;
-
-var earthImg = document.getElementById("earth");
-var mountain = document.getElementById("mountain");
-
-//var label = document.getElementById("alpha");
-
-var trace = new Array();
-
-var animating = false;
-var reqAnimID = null;
-
-function initValues(){
-
-	ball.x = earth.center.x; 
-	ball.y = earth.center.y - earth.radius - ball.radius - 16;
-
-	ball.vx = 2.6;	
-	ball.vy = 0;
-	ball.ax = 0;
-	ball.ay = 0;
-	//ball.radius = 2;
-	trace = new Array();
-	animating = false;
-	adjustBallAcceleration();
-	reqAnimID = null;
-}
-
-
-document.getElementById('zoomin').addEventListener('click',zoomIn);
-document.getElementById('zoomout').addEventListener('click',zoomOut);
-var speed = document.getElementById('speed');
-speed.addEventListener('change',adjustSpeed);
-var speedLabel = document.getElementById('speedLabel');
-
-document.getElementById('start').addEventListener('click',start);
-document.getElementById('stop').addEventListener('click',stopAnimation);
-document.getElementById('reset').addEventListener('click',reset);
-
-/********************
-* HANDLING ZOOM
-*********************/
-var zoomPoint = new Point(earth.center.x + 50, earth.center.y - earth.radius - 20);
-var scaleFactor = 1.8;
-var zoomLimit = 1;
-
-function zoomIn(){
-	if(zoomLimit < 6){
-		zoomToPoint(zoomPoint,scaleFactor,'in');
-		++zoomLimit;
-		ball.radius -= zoomLimit/20;
-		
-	}
-}
-function zoomOut(){
-	if(zoomLimit > 1){
-		zoomToPoint(zoomPoint,scaleFactor,'out');
-		--zoomLimit;
-		ball.radius += zoomLimit/20;		
-		
-	}
-}
-
-/*****************************
-* ANIMATION START/STOP/RESET
-******************************/
-
-window.onload = function(){
-	initValues();
-	paint();
-	//console.log(distance(ball.center,earth.center));
-};
-
-
-function start(){
-	if(!reqAnimID){
-		reset();
-		adjustSpeed();
-		animating = true;
-		speed.disabled = true;
-		startAnimation();
-	}
-}
-function startAnimation(){
-	reqAnimID = reqAnimFrame(startAnimation);	
-	paint();
-}
-
-function stopAnimation(){
-	if(reqAnimID){
-		cancelAnim(reqAnimID);
-		animating = false;
-		console.log('stopped , #of points = ' + trace.length);
-	}
-}
-
-function reset(){
-	stopAnimation();
-	initValues();
-	speed.disabled = false;
-	paint();
-}
-
-function adjustSpeed(){
-	ball.vx = document.getElementById("speed").value/50;
-	speedLabel.innerHTML = 'Speed = ' + speed.value + ' m/s';
-}
-
-
-/*******************
-* MAIN PAINT FUNCTION
-********************/
-function paint(){
-	var grad = ctx.createLinearGradient(can.width/2, 0, can.width/2, can.height);
-	// light blue
-	grad.addColorStop(0, '#ceedff');
-	// dark blue
-	grad.addColorStop(1, '#fff');
-	ctx.fillStyle = '#ceedff';
-	ctx.fillStyle = grad;
-	ctx.fillRect(0,0,can.width, can.height);
-	
-	//ctx.clearRect(0,0,can.width,can.height);
-	//drawing the earth. Images are drawn from upper left corner
-	//ctx.drawImage(earthImg,earth.center.x - earth.radius,earth.center.y - earth.radius, earth.radius*2, earth.radius*2);
-	ctx.drawImage(mountain, can.width/2 - mountain.width + 5, earth.center.y - earth.radius - 16,20,20);
-	
-	trace.forEach(function(pt){
-		ctx.save();
-		ctx.fillStyle = 'red';
-		ctx.fillRect(pt.x,pt.y,1,1);
-		ctx.restore();
-	});
-	
-	earth.draw();
-	ball.draw();
-	
-	if(animating){
-		adjustBallAcceleration();		
-		ball.updatePosition();	
-		trace.push(new Point(ball.x,ball.y));
-	}
-	
-	
-	if((distance(ball.center,earth.center) < earth.radius || ball.outOfCanvas() ) && animating == true){
-		stopAnimation();
-	}
-}
-
-/**************
-* CALCULATIONS
-***************/
-
-var acceleration = 0.02;
-
-function adjustBallAcceleration(){
-	
-	// ax = cos(alpha)*a; ay = sin(alpha)*a;
-	ball.ax = (earth.center.x - ball.center.x)/distance(earth.center,ball.center)*acceleration;
-	ball.ay = (earth.center.y - ball.center.y)/distance(earth.center,ball.center)*acceleration;
+var visibleState = true;
+function showHidePanel(){
+	visibleState = !visibleState;
+	document.getElementById('leftControls').style.display = (visibleState ? 'block' :'none');
 	
 }
-
-
-
-
-
-
-/********
-* Mouse scroll not used
-*********/
-lowZoom = 0;
-highZoom = 30;
-var delta = 1.0;
-function handleScroll(evt){
-
-	delta = evt.wheelDelta ? evt.wheelDelta/40 : evt.detail ? -evt.detail : 0;
-	
-	if(delta < 0 && zoomLimit > lowZoom)
-		--zoomLimit;
-	else if(delta > 0 && zoomLimit < highZoom)
-		++zoomLimit;
-	
-	if( zoomLimit > lowZoom && zoomLimit < highZoom){
-		if (delta) zoomToPoint(delta, point);
-		paint();
-	}
-}
-
 </script>
-
 </body>
 </html>
 

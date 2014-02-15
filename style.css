@@ -3,6 +3,13 @@ body{
 	margin:0px;
 	font-family:Verdana, Helvetica, Arial;
 }
+a{
+	color:#4391a0;
+	text-decoration:none;
+}
+a:hover{
+	text-decoration:underline;
+}
 #canvas{
 	padding:0; margin:auto; border: 1px solid #ccc;
 	background:white;
