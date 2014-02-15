@@ -16,34 +16,58 @@
 	left:865px;
 	top:2.5em;
 }
+
+#speed{
+	position:absolute;
+	left:5px;
+	top:1em;
+	width:150px;
+}
+#speedLabel{
+	position:absolute;
+	left:5px;
+	top:2.8em;
+	width:150px;
+	font-size:10pt;
+}
 #start{
 	position:absolute;
-	left:850px;
+	left:10px;
 	top:4.5em;
+}
+#stop{
+	position:absolute;
+	left:10px;
+	top:6.5em;
 }
 #reset{
 	position:absolute;
-	left:845px;
-	top:6.5em;
+	left:10px;
+	top:8.5em;
 }
+
 </style>
 </head>
 
 <body>
 <img id="earth" src="earth.png" style="width:500px;visibility:hidden;display:none" width="500px" />
-<img id="mountain" src="mountain.png" style="width:500px;visibility:hidden;display:none" />
+<img id="mountain" src="mountain.png" style="width:500px;visibility:hidden;display:none" width="20px" />
 <div id="container">
-	<input id="zoomin" type="button" value="+" />
-	<input id="zoomout" type="button" value="-" />
-	<input id="start" type="button" value="Start" />
-	<input id="reset" type="button" value="Reset" />
+	<input id="zoomin" type="button" value="+" >
+	<input id="zoomout" type="button" value="-" >
+	<input id="speed" type="range" min="1" max="100" >
+	<label for="speed" id="speedLabel">Speed = 50 m/s</label>
+	<input id="start" type="button" value="Start" >
+	<input id="stop" type="button" value="Stop" >
+	<input id="reset" type="button" value="Reset" >	
 	<canvas width="900" height="500" id="canvas">Your browser doesn't support canvas.</canvas>
 </div>
-<label id="alpha"></label>
-
+<!-- <label id="alpha"></label>
+ -->
 
 <script src="../lib/utils.js"></script>
 <script src="../lib/ball.js"></script>
+<script src="http://d3lp1msu2r81bx.cloudfront.net/kjs/js/lib/kinetic-v5.0.1.min.js"></script>
 
 <script>
 
@@ -53,13 +77,33 @@
 
 var earth = {
 	radius : 200,
-	center : new Point(450,250)
+	center : new Point(450,250),
+	draw : function(){
+			var x = this.center.x;
+			var y = this.center.y;
+			ctx.save();
+			var grad = ctx.createRadialGradient(x, y, this.radius/5,x, y, this.radius*2);
+			// light blue
+			grad.addColorStop(0, '#8ED6FF');
+			// dark blue
+			grad.addColorStop(1, '#004CB3');			
+			ctx.fillStyle = grad;
+			ctx.beginPath();
+			ctx.arc(this.center.x,this.center.y,this.radius, 0 , 2*Math.PI);
+			ctx.fill();
+			
+			ctx.restore();	
+			
+		}
 };
 
-var ball = new Ball('red',0.5);
+var ball = new Ball('black',2);
+var angle = 0;
 
 var earthImg = document.getElementById("earth");
 var mountain = document.getElementById("mountain");
+
+//var label = document.getElementById("alpha");
 
 var trace = new Array();
 
@@ -68,14 +112,14 @@ var reqAnimID = null;
 
 function initValues(){
 
-	ball.x = earth.center.x - 14; 
+	ball.x = earth.center.x; 
 	ball.y = earth.center.y - earth.radius - ball.radius - 16;
 
-	ball.vx = 1.4;	
+	ball.vx = 2.6;	
 	ball.vy = 0;
 	ball.ax = 0;
 	ball.ay = 0;
-	
+	//ball.radius = 2;
 	trace = new Array();
 	animating = false;
 	adjustBallAcceleration();
@@ -85,26 +129,35 @@ function initValues(){
 
 document.getElementById('zoomin').addEventListener('click',zoomIn);
 document.getElementById('zoomout').addEventListener('click',zoomOut);
+var speed = document.getElementById('speed');
+speed.addEventListener('change',adjustSpeed);
+var speedLabel = document.getElementById('speedLabel');
+
 document.getElementById('start').addEventListener('click',start);
+document.getElementById('stop').addEventListener('click',stopAnimation);
 document.getElementById('reset').addEventListener('click',reset);
 
 /********************
 * HANDLING ZOOM
 *********************/
-var zoomPoint = new Point(earth.center.x + 20, earth.center.y - earth.radius - 20);
+var zoomPoint = new Point(earth.center.x + 50, earth.center.y - earth.radius - 20);
 var scaleFactor = 1.8;
 var zoomLimit = 1;
 
 function zoomIn(){
 	if(zoomLimit < 6){
 		zoomToPoint(zoomPoint,scaleFactor,'in');
-		++zoomLimit;	
+		++zoomLimit;
+		ball.radius -= zoomLimit/20;
+		
 	}
 }
 function zoomOut(){
 	if(zoomLimit > 1){
 		zoomToPoint(zoomPoint,scaleFactor,'out');
-		--zoomLimit;		
+		--zoomLimit;
+		ball.radius += zoomLimit/20;		
+		
 	}
 }
 
@@ -121,7 +174,10 @@ window.onload = function(){
 
 function start(){
 	if(!reqAnimID){
+		reset();
+		adjustSpeed();
 		animating = true;
+		speed.disabled = true;
 		startAnimation();
 	}
 }
@@ -139,10 +195,15 @@ function stopAnimation(){
 }
 
 function reset(){
-
 	stopAnimation();
 	initValues();
+	speed.disabled = false;
 	paint();
+}
+
+function adjustSpeed(){
+	ball.vx = document.getElementById("speed").value/50;
+	speedLabel.innerHTML = 'Speed = ' + speed.value + ' m/s';
 }
 
 
@@ -150,29 +211,35 @@ function reset(){
 * MAIN PAINT FUNCTION
 ********************/
 function paint(){
-
-	ctx.fillStyle = '#eff';
+	var grad = ctx.createLinearGradient(can.width/2, 0, can.width/2, can.height);
+	// light blue
+	grad.addColorStop(0, '#ceedff');
+	// dark blue
+	grad.addColorStop(1, '#fff');
+	ctx.fillStyle = '#ceedff';
+	ctx.fillStyle = grad;
 	ctx.fillRect(0,0,can.width, can.height);
 	
 	//ctx.clearRect(0,0,can.width,can.height);
 	//drawing the earth. Images are drawn from upper left corner
-	ctx.drawImage(earthImg,earth.center.x - earth.radius,earth.center.y - earth.radius, earth.radius*2, earth.radius*2);
-	ctx.drawImage(mountain,425,earth.center.y - earth.radius - 16,20,20);
+	//ctx.drawImage(earthImg,earth.center.x - earth.radius,earth.center.y - earth.radius, earth.radius*2, earth.radius*2);
+	ctx.drawImage(mountain, can.width/2 - mountain.width + 5, earth.center.y - earth.radius - 16,20,20);
+	
+	trace.forEach(function(pt){
+		ctx.save();
+		ctx.fillStyle = 'red';
+		ctx.fillRect(pt.x,pt.y,1,1);
+		ctx.restore();
+	});
+	
+	earth.draw();
+	ball.draw();
 	
 	if(animating){
 		adjustBallAcceleration();		
 		ball.updatePosition();	
 		trace.push(new Point(ball.x,ball.y));
 	}
-	
-	ball.draw();
-	
-	trace.forEach(function(pt){
-		ctx.save();
-		ctx.fillStyle = 'red';
-		ctx.fillRect(pt.x,pt.y,0.51,0.51);
-		ctx.restore();
-	});
 	
 	
 	if((distance(ball.center,earth.center) < earth.radius || ball.outOfCanvas() ) && animating == true){
@@ -183,14 +250,15 @@ function paint(){
 /**************
 * CALCULATIONS
 ***************/
-var alpha = 0.0;
+
 var acceleration = 0.02;
-var alphalable = document.getElementById("alpha");
+
 function adjustBallAcceleration(){
-	alpha = angleBetween(ball.center, earth.center);
-	ball.ax = Math.cos(alpha)*acceleration;
-	ball.ay = Math.sin(alpha)*acceleration;
-	alphalable.innerHTML = alpha*180/(Math.PI) + "<br>" + ball.ax;
+	
+	// ax = cos(alpha)*a; ay = sin(alpha)*a;
+	ball.ax = (earth.center.x - ball.center.x)/distance(earth.center,ball.center)*acceleration;
+	ball.ay = (earth.center.y - ball.center.y)/distance(earth.center,ball.center)*acceleration;
+	
 }
 
 
