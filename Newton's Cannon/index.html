@@ -12,11 +12,16 @@ February, 2014
 input{
 	margin:2px;
 }
+
 h4{
 	margin:5px;padding:0;
 	width : 200px;
 }
+#container{ 
+	position:relative;
+}
 #rightPanel{
+	z-index:3;
 	position:absolute;
 	left:865px;
 	top:.5em;
@@ -25,6 +30,7 @@ h4{
 #zoomout{ width:30px; }
 
 #leftPanel{
+	z-index:3;
 	background:#fff;
 	position:absolute;
 	left:5px;
@@ -34,9 +40,11 @@ h4{
 	padding:10px;
 	border:1px solid #aaf;
 }
-#speed{
-	width:150px;
-	max-height:1em;
+#leftPanel a{
+	float:right;
+}
+#leftControls input{
+	max-width:150px;
 }
 #speedLabel{
 	font-size:10pt;
@@ -47,8 +55,8 @@ h4{
 </head>
 
 <body>
-<img id="earth" src="earth.png" style="width:500px;visibility:hidden;display:none" width="500px" />
-<img id="mountain" src="mountain.png" style="width:500px;visibility:hidden;display:none" width="20px" />
+<img id="earth" src="earth.png" style="visibility:hidden;display:none" width="500px" />
+<img id="mountain" src="mountain.png" style="visibility:hidden;display:none" width="20px" />
 <div id="container">
 	<div id="rightPanel">
 		<input id="zoomin" type="button" value="+" ><br>
@@ -59,19 +67,19 @@ h4{
 		<div id="leftControls">
 			<h4>Speed:</h4>
 			<input id="speed" type="range" value="20" min="0" max="100" >
-			<label for="speed" id="speedLabel">Speed = 50 m/s</label>
+			<label for="speed" id="speedLabel">50 m/s</label>
 			<h4>Height:</h4>
 			<input id="height" type="range" value="40" min="0" max="100" >
-			<label for="height" id="speedLabel">height = 50 m</label>
+			<label for="height" id="speedLabel">20 m</label>
 			<h4>Angle:</h4>
 			<input id="angle" type="range" value="0" min="0" max="90" >
-			<label for="Angle" id="speedLabel">Angle = 50&deg;</label><br><br>
+			<label for="Angle" id="speedLabel">50&deg;</label><br><br>
 			<input id="start" type="button" value="Start" >
 			<input id="stop" type="button" value="Pause" >
 			<input id="reset" type="button" value="Reset" >
 		</div>
 	</div>
-	<canvas width="900" height="500" id="canvas">Your browser doesn't support canvas.</canvas>
+	<canvas id="canvas" width="900" height="500">Your browser doesn't support canvas.</canvas>
 </div>
 <!-- <label id="alpha"></label>
  -->
@@ -86,7 +94,7 @@ var visibleState = true;
 function showHidePanel(){
 	visibleState = !visibleState;
 	document.getElementById('leftControls').style.display = (visibleState ? 'block' :'none');
-	
+	document.getElementById('leftPanel').children[0].innerHTML = (visibleState ? '-' :'+');
 }
 </script>
 </body>

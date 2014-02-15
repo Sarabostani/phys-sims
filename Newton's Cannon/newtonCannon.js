@@ -29,15 +29,14 @@ var earth = {
 var ball = new Ball('black', 2);
 var angle = 0;
 
-var earthImg = document.getElementById("earth");
-var mountain = document.getElementById("mountain");
-
-//var label = document.getElementById("alpha");
-
+var earthImg = element("earth");
+var mountain = element("mountain");
 var trace = new Array();
 
 var animating = false;
 var reqAnimID = null;
+
+can.style.background = 'linear-gradient( 0deg, white, #c9ebff )';
 
 function initValues(){
 
@@ -56,15 +55,20 @@ function initValues(){
 }
 
 
-document.getElementById('zoomin').addEventListener('click',zoomIn);
-document.getElementById('zoomout').addEventListener('click',zoomOut);
-var speed = document.getElementById('speed');
+element('zoomin').addEventListener('click',zoomIn);
+element('zoomout').addEventListener('click',zoomOut);
+var speed = element('speed');
 speed.addEventListener('change',adjustSpeed);
-var speedLabel = document.getElementById('speedLabel');
+var speedLabel = element('speedLabel');
 
-document.getElementById('start').addEventListener('click',start);
-document.getElementById('stop').addEventListener('click',stopAnimation);
-document.getElementById('reset').addEventListener('click',reset);
+element('start').addEventListener('click',start);
+element('stop').addEventListener('click',stopAnimation);
+element('reset').addEventListener('click',reset);
+
+var mouseDown = false;
+/* can.addEventListener("mousedown",function(){mouseDown = true;});
+can.addEventListener("mouseup",function(){mouseDown = false;});
+can.addEventListener("mousemove", moveCanvas); */
 
 
 /*****************************
@@ -120,7 +124,7 @@ function reset(){
 }
 
 function adjustSpeed(){
-	ball.vx = document.getElementById("speed").value/50;
+	ball.vx = element("speed").value/50;
 	speedLabel.innerHTML = 'Speed = ' + speed.value + ' m/s';
 }
 
@@ -129,18 +133,7 @@ function adjustSpeed(){
 * MAIN PAINT FUNCTION
 ********************/
 function paint(){
-	var grad = ctx.createLinearGradient(can.width/2, 0, can.width/2, can.height);
-	// light blue
-	grad.addColorStop(0, '#ceedff');
-	// dark blue
-	grad.addColorStop(1, '#fff');
-	ctx.fillStyle = '#ceedff';
-	ctx.fillStyle = grad;
-	ctx.fillRect(0,0,can.width, can.height);
-	
-	//ctx.clearRect(0,0,can.width,can.height);
-	//drawing the earth. Images are drawn from upper left corner
-	
+	ctx.clearRect(0,0, can.width,can.height);
 	ctx.drawImage(mountain, can.width/2 - mountain.width + 5, earth.center.y - earth.radius - 16,20,20);
 	
 	trace.forEach(function(pt){
@@ -172,7 +165,7 @@ function paint(){
 }
 
 /********************
-* HANDLING ZOOM
+* ZOOM AND TRANSLATE
 *********************/
 var zoomPoint = new Point(earth.center.x, earth.center.y - earth.radius - 4);
 var scaleFactor = 1.6;
@@ -195,6 +188,15 @@ function zoomOut(){
 		ball.radius += scaleFactor / 12;
 		//console.log(zoomLimit);
 		
+	}
+}
+
+function moveCanvas(event){
+	if(mouseDown && zoomLimit > 2){
+		element('leftControls').children[2].innerHTML = event.clientX;
+		ctx.translate(event.clientX - can.width/2, event.clientY - can.height/2);
+		paint();
+		ctx.translate(-(event.clientX - can.width/2), -(event.clientY - can.height/2));
 	}
 }
 
