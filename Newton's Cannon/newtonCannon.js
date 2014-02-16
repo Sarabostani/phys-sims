@@ -1,4 +1,3 @@
-
 /****************************
 * INITIALIZING VALUES AND VARIABLES
 ******************************/
@@ -61,6 +60,10 @@ var speed = element('speed');
 speed.addEventListener('change',adjustSpeed);
 var speedLabel = element('speedLabel');
 
+var angle = element('angle');
+angle.addEventListener('change',adjustAngle);
+var angleLabel = element('angleLabel');
+
 element('start').addEventListener('click',start);
 element('stop').addEventListener('click',stopAnimation);
 element('reset').addEventListener('click',reset);
@@ -79,6 +82,7 @@ var collision = false;
 window.onload = function(){
 	initValues();
 	adjustSpeed();
+	adjustAngle();
 	paint();
 	//console.log(distance(ball.center,earth.center));
 };
@@ -88,6 +92,7 @@ function start(){
 	if(!animating && !collision){
 		animating = true;
 		speed.disabled = true;
+		angle.disabled = true;
 		collision = false;
 		startAnimation();
 	}
@@ -95,6 +100,7 @@ function start(){
 		reset();		
 		animating = true;
 		speed.disabled = true;
+		angle.disabled = true;
 		collision = false;
 		startAnimation();
 	}
@@ -118,8 +124,10 @@ function reset(){
 	stopAnimation();
 	initValues();
 	speed.disabled = false;
+	angle.disabled = false;
 	collision = false;
 	adjustSpeed();
+	adjustAngle();
 	paint();
 }
 
@@ -128,6 +136,11 @@ function adjustSpeed(){
 	speedLabel.innerHTML = 'Speed = ' + speed.value + ' m/s';
 }
 
+function adjustAngle(){
+	ball.vx = (element("speed").value/50)*Math.cos( Math.PI*(element("angle").value/180) );
+	ball.vy = -1*(element("speed").value/50)*Math.sin( Math.PI*(element("angle").value/180) );
+	angleLabel.innerHTML = 'Angle = ' + angle.value + '&deg';
+}
 
 /*******************
 * MAIN PAINT FUNCTION
@@ -161,6 +174,7 @@ function paint(){
 		stopAnimation();
 		collision = true;
 		speed.disabled = false;
+		angle.disabled = false;
 	}
 }
 
