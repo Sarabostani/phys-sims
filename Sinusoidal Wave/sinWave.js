@@ -10,7 +10,7 @@ function initialize(){
 * ANIMATION START/STOP/RESET
 ******************************/
 window.onload = function(){
-	initValues();
+	initialize();
 	paint();
 }
 
@@ -39,6 +39,8 @@ function reset(){
 ********************/
 
 function paint(){
+	ctx.fillStyle = '#aeb';
+	ctx.fillRect(0,0,can.width,can.height);
 }
 
 

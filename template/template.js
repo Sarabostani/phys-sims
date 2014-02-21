@@ -10,7 +10,7 @@ function initialize(){
 * ANIMATION START/STOP/RESET
 ******************************/
 window.onload = function(){
-	initValues();
+	initialize();
 	paint();
 }
 
