@@ -40,7 +40,7 @@ can.style.background = 'linear-gradient( 0deg, white, #c9ebff )';
 function initValues(){
 
 	ball.x = earth.center.x; 
-	ball.y = earth.center.y - earth.radius - ball.radius - 16;
+	ball.y = earth.center.y - earth.radius - ball.radius - height;
 
 	ball.vx = 2.6;	
 	ball.vy = 0;
@@ -59,6 +59,10 @@ element('zoomout').addEventListener('click',zoomOut);
 var speed = element('speed');
 speed.addEventListener('change',adjustSpeed);
 var speedLabel = element('speedLabel');
+
+height = element('height').value;
+element('height').addEventListener('change',adjustHeight);
+element('height').addEventListener('mouseup',reset);
 
 var angle = element('angle');
 angle.addEventListener('change',adjustAngle);
@@ -83,6 +87,7 @@ window.onload = function(){
 	initValues();
 	adjustSpeed();
 	adjustAngle();
+	adjustHeight();
 	paint();
 	//console.log(distance(ball.center,earth.center));
 };
@@ -128,6 +133,7 @@ function reset(){
 	collision = false;
 	adjustSpeed();
 	adjustAngle();
+	adjustHeight();
 	paint();
 }
 
@@ -136,10 +142,15 @@ function adjustSpeed(){
 	speedLabel.innerHTML = 'Speed = ' + speed.value + ' m/s';
 }
 
+function adjustHeight(){
+	height = element('height').value;
+	element('heightLabel').innerHTML = 'Height = ' + height + ' m';
+}
+
 function adjustAngle(){
 	ball.vx = (element("speed").value/50)*Math.cos( Math.PI*(element("angle").value/180) );
-	ball.vy = -1*(element("speed").value/50)*Math.sin( Math.PI*(element("angle").value/180) );
-	angleLabel.innerHTML = 'Angle = ' + angle.value + '&deg';
+	ball.vy = -(element("speed").value/50)*Math.sin( Math.PI*(element("angle").value/180) );
+	angleLabel.innerHTML = 'Angle = ' + angle.value + '&deg;';
 }
 
 /*******************
@@ -147,7 +158,7 @@ function adjustAngle(){
 ********************/
 function paint(){
 	ctx.clearRect(0,0, can.width,can.height);
-	ctx.drawImage(mountain, can.width/2 - mountain.width + 5, earth.center.y - earth.radius - 16,20,20);
+	//ctx.drawImage(mountain, can.width/2 - mountain.width + 5, earth.center.y - earth.radius - 16,20,20);
 	
 	trace.forEach(function(pt){
 		ctx.save();
