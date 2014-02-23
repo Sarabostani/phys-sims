@@ -2,25 +2,73 @@
 * INITIALIZING VALUES AND VARIABLES
 ******************************/
 var wt = 0;
+var dwt = 0.05;
+var numPoints = 900;
+var amplitude = 100;
 
-var hp = new HyperPixel(3,3,'red');
-var wave = new Array();
+var wavePoints = new Array();
+var pointsToDraw = new Array();
+
+var pixWidth = 3;
+
+element('addPoint').addEventListener('click',function (){
+	//choose a random index from wave points 
+	var index = Math.round(wavePoints.length*Math.random());
+	//add it to points to draw
+	pointsToDraw.push(wavePoints[index]);
+	//remove it from wave points
+	wavePoints.splice(index,1);
+});
+
+element('paintAll').addEventListener('click',function(){
+	for(var i = 0; i < wavePoints.length ; i++){
+		pointsToDraw.push(wavePoints[i]);
+	}
+	element('addPoint').disabled = true;
+	element('paintAll').disabled = true;
+});
+
+element('amplitude').addEventListener('change',function(){
+	amplitude = element('amplitude').value;
+});
+
+element('frequency').addEventListener('change',function(){
+	dwt = element('frequency').value/500;
+});
+
+element('resetBtn').addEventListener('click',reset);
+
 
 function initialize(){
-	hp.center.x = can.width/2 + vrtclInterval;
-	hp.center.y = can.height/3;
+	var pointInterval = can.width/numPoints;
+	
 	wt = Math.PI/4;
 	
-	wave.push(new HyperPixel(3,3,'red'));
+	for(var i = xPos = phase = 0; i < numPoints; i++){
+		wavePoints.push({
+			'point': new HyperPixel(pixWidth, pixWidth, 'red', xPos, can.height/2),
+			'phase' : phase
+		});		
+		xPos += pointInterval;
+		phase += 4*Math.PI/(can.width);
+	}
+	
+	amplitude = element('amplitude').value;
+	
 }
 
 /*****************************
 * ANIMATION START/STOP/RESET
 ******************************/
 window.onload = function(){
+	
 	initialize();
 	startAnimation();
 	//paint();
+	
+	/*var bgImg = can.toDataURL();
+	
+	element('bg').src = bgImg;*/
 }
 
 var reqAnimID = null;
@@ -39,29 +87,42 @@ function stop(){
 }
 
 function reset(){
-	
+	location.reload();
 }
+
+
 
 
 /*******************
 * MAIN PAINT FUNCTION
 ********************/
-var horizontalGrid = 4;
+var horizontalGrid = 10;
 var verticalGrid = 10;
 var hrzInterval = Math.floor(can.height/horizontalGrid); //distance between h lines
 var vrtclInterval = can.width/verticalGrid;
+var i = 0;
 
+var bgImg = element('bgImg');
 function paint(){
 
-	ctx.fillStyle = '#faf9fc';
+	/* ctx.fillStyle = '#faf9fc';
 	ctx.fillRect(0,0,can.width,can.height);
-	drawGrid();
+	drawGrid(); */
+	ctx.drawImage(bgImg,0,0,can.width,can.height);
 	
-	//hp.center.x += 200*Math.sin(hp.center.x);
-	wt += 0.05;
-	hp.center.y = 100*Math.sin(wt) + can.height/2;
-	hp.draw();
+	if(pointsToDraw.length > 0){
+		wt += dwt;
+		/*wavePoints.forEach(function(w){
+			w.point.center.y = amplitude*Math.sin(wt + w.phase) + can.height/2;
+			w.point.draw();
+		});*/
+		pointsToDraw.forEach(function(w){
+			w.point.center.y = amplitude*Math.sin(wt + w.phase) + can.height/2;
+			w.point.draw();
+		});
+	}
 	
+	//element('phaseLabel').innerHTML = wt;
 	
 }
 
@@ -103,6 +164,7 @@ function drawGrid(){
 	ctx.stroke();
 	ctx.closePath();
 }
+
 
 
 /**************
