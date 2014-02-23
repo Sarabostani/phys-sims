@@ -2,6 +2,7 @@ body{
 	padding:0px;
 	margin:0px;
 	font-family:Verdana, Helvetica, Arial;
+	overflow:hidden;
 }
 a{
 	color:#4391a0;
