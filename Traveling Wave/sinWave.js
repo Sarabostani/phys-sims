@@ -32,8 +32,8 @@ element('amplitude').addEventListener('change',function(){
 	amplitude = element('amplitude').value;
 });
 
-element('frequency').addEventListener('change',function(){
-	dwt = element('frequency').value/500;
+element('speed').addEventListener('change',function(){
+	dwt = element('speed').value/500;
 });
 
 element('resetBtn').addEventListener('click',reset);
@@ -43,7 +43,7 @@ function initialize(){
 	var pointInterval = can.width/numPoints;
 	
 	wt = Math.PI/4;
-	
+	dwt = element('speed').value/500;
 	for(var i = xPos = phase = 0; i < numPoints; i++){
 		wavePoints.push({
 			'point': new HyperPixel(pixWidth, pixWidth, 'red', xPos, can.height/2),
