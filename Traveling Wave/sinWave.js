@@ -28,15 +28,23 @@ element('paintAll').addEventListener('click',function(){
 	element('paintAll').disabled = true;
 });
 
-element('amplitude').addEventListener('change',function(){
+/*element('amplitude').addEventListener('change',function(){
+	amplitude = element('amplitude').value;
+});*/
+
+element('amplitude').onChange(function(){
 	amplitude = element('amplitude').value;
 });
 
-element('speed').addEventListener('change',function(){
+element('speed').onChange(function(){
 	dwt = element('speed').value/500;
 });
 
-element('resetBtn').addEventListener('click',reset);
+element('resetBtn').onClick(function(){
+	window.location = window.location;
+
+});
+
 
 
 function initialize(){
