@@ -18,6 +18,7 @@ var ballNum=0;
 var k = 0.059; //spring constant
 var b = 0.071; //damping constant
 
+//setup an array of Ball objects, with length of variable "size"
 for( var i=1; i <= size; i++)
 {
 	var temp = new Ball("#ff88aa",radius);
@@ -77,8 +78,8 @@ function paint(){
 ***************/
 function update()
 {
-	if(mouseDown && ballNum >= 0) ballArr[ballNum].y = mouseY;
-	applyPhysOnBall();
+	if(mouseDown && ballNum >= 0) ballArr[ballNum].y = mouseY; //moves a selected Ball object with the mouse
+	applyPhysOnBall(); //applies physics( magic ) to the array of ball objects
 }
 function trackMouse()
 {
@@ -98,7 +99,8 @@ function trackMouse()
 
 function applyPhysOnBall()
 {
-
+	//This is bit jerry rigged, but it does something, so...
+	//these following structures could probably use some cleanup
 	for(var i=0; i < size; i++)
 	{
 		dy = can.height/2 - ballArr[i].y;
@@ -108,6 +110,7 @@ function applyPhysOnBall()
 		
 		ballArr[i].updatePosition();
 	}
+	//applies physics to the left of the selected ball
 	for(var i=0; i < ballNum; i++)
 	{
 		dy = ballArr[i+1].y - ballArr[i].y;
@@ -117,6 +120,7 @@ function applyPhysOnBall()
 
 		ballArr[i].updatePosition();
 	}
+	//applies physics to the right of the selected ball
 	for(var i=ballNum+1; i < size; i++)
 	{
 		if(i==size-1) dy = ballArr[i-1].y - ballArr[i].y;
@@ -128,29 +132,13 @@ function applyPhysOnBall()
 		ballArr[i].updatePosition();
 	}
 	
-	/*
-	for(var i=0; i < size; i++)
-	{
-		//dx = X - ballArr[i].x,
-		if(ballNum >= 0 && i != ballNum) 
-		{
-			if (i-1==ballNum) dy = ballArr[i-1].y - ballArr[i].y;
-			else if(i==size-1) dy = ballArr[i-1].y - ballArr[i].y;
-			else dy = ballArr[i+1].y - ballArr[i].y;
-	
-			ballArr[i].vy *= (k/b);
-			ballArr[i].ay = k*dy;
-
-			ballArr[i].updatePosition();
-		}
-	}
-	*/
 }
 
 /**************
 * EVENTS
 ***************/
 
+//I stole this from "Spring Ball"
 can.addEventListener("mousemove", function(e){
 	mouseX = e.clientX;
 	mouseY = e.clientY;
