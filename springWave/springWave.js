@@ -7,6 +7,8 @@ var radius = 10;
 var size = (can.width/(radius*2)) - 2;
 var ballArr = new Array();
 
+var drawLines = true;
+var drawBalls = true;
 var reqAnimID = null;
 
 //variables for moving a ball with the mouse
@@ -15,8 +17,8 @@ var mouseDown = false;
 var ballNum=0;
 
 //taken from "Spring Ball"
-var k = 0.059; //spring constant
-var b = 0.071; //damping constant
+var k = 0.066; //spring constant
+var b = 0.080; //damping constant
 
 //setup an array of Ball objects, with length of variable "size"
 for( var i=1; i <= size; i++)
@@ -28,7 +30,7 @@ for( var i=1; i <= size; i++)
 }
 
 function initialize(){
-	reqAnimID = null;
+
 }
 
 /*****************************
@@ -38,8 +40,6 @@ window.onload = function(){
 	initialize();
 	startAnimation();
 }
-
-var reqAnimID = null;
 
 function start(){
 	
@@ -68,8 +68,19 @@ function reset(){
 function paint(){
 	ctx.clearRect(0,0, can.width,can.height);
 	
-	for(var i=0; i < size; i++)
-		ballArr[i].draw();
+	//draws lines in between ball objects
+	if(drawLines)
+		for(var i=0; i < size - 1; i++)
+		{
+			ctx.beginPath(); 
+			ctx.moveTo(ballArr[i].x, ballArr[i].y); 
+			ctx.lineTo(ballArr[i+1].x, ballArr[i+1].y); 
+			ctx.stroke();
+		}
+	
+	if(drawBalls)
+		for(var i=0; i < size; i++)
+			ballArr[i].draw();
 }
 
 
@@ -89,9 +100,10 @@ function trackMouse()
 	//if collision is found, return and track mouse
 	for(var i=0; i < size; i++)
 	{
-		if(mouseX > ballArr[i].x - 10 && mouseX < ballArr[i].x + 10 && mouseY > ballArr[i].y - 14 && mouseY < ballArr[i].y + 14)
+		if(mouseX > ballArr[i].x - radius && mouseX < ballArr[i].x + radius && mouseY > ballArr[i].y - radius && mouseY < ballArr[i].y + radius)
 		{
 			ballNum = i;
+			return;
 		}
 	}
 
