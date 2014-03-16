@@ -7,8 +7,13 @@ var radius = 10;
 var size = (can.width/(radius*2)) - 2;
 var ballArr = new Array();
 
+//used with html buttons/checkboxes/etc.
 var drawLines = true;
 var drawBalls = true;
+var oscillate = false;
+var freq = 0.43;
+var rad = 0;
+
 var reqAnimID = null;
 
 //variables for moving a ball with the mouse
@@ -91,6 +96,12 @@ function update()
 {
 	if(mouseDown && ballNum >= 0) ballArr[ballNum].y = mouseY; //moves a selected Ball object with the mouse
 	applyPhysOnBall(); //applies physics( magic ) to the array of ball objects
+	if(oscillate)
+		if(rad < 2*Math.PI) rad += freq;
+		else rad = 0;
+	else
+		rad = 0;
+		
 }
 function trackMouse()
 {
@@ -121,6 +132,10 @@ function applyPhysOnBall()
 		ballArr[i].ay = k*dy;
 		
 		ballArr[i].updatePosition();
+	}
+	if(oscillate)
+	{
+		ballArr[ballNum].y = Math.sin(rad)*can.height/2 + can.height/2;
 	}
 	//applies physics to the left of the selected ball
 	for(var i=0; i < ballNum; i++)
@@ -167,6 +182,24 @@ can.addEventListener("mouseup", function(e){
 	console.log("up");
 });
 
+//checkboxes and scroll
+element('frequency').onChange(function(){
+	freq = element('frequency').value/100;
+});
+
+element('oscillate').onChange(function(){
+	oscillate = element('oscillate').checked;
+});
+
+element('drawBalls').onChange(function(){
+	drawBalls =  element('drawBalls').checked;
+
+});
+
+element('drawLines').onChange(function(){
+	drawLines =  element('drawLines').checked;
+
+});
 
 function events()
 {

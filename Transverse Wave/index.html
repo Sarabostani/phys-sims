@@ -3,18 +3,54 @@
 <head>
 	<title>Spring Wave</title>
 	<link rel="stylesheet" type="text/css" href="../style.css" />
+	<style>
+	#topPanel{
+		position:absolute;
+		z-index:2;
+		left:200px;
+		top:-90px;
+		padding:0.75em;
+		border:1px solid #aaf;
+		width:500px;
+		background:white;
+		box-shadow:0px 0px 10px #333;
+		border-bottom-right-radius:10px;
+		border-bottom-left-radius:10px;
+		transition:top 0.3s
+		}
+	#topPanel:hover{
+		top:0px
+	}
+	#topPanel:active{
+		top:0px
+	}	
+	#topPanel input{
+		max-width:120px;
+		margin:0.5em
+	}
+	.trackbar{ margin:0; padding:0 }
+	</style>
 </head>
 
 <body>
+<div id="topPanel">
+	<label for="frequency">Frequency</label>
+	<input class="trackbar" type="range" value="43" min="1" max="50" id="frequency" />
+	<br></br>
+	<label for="oscillate">Oscillate</label>
+	<input type="checkbox" id="oscillate"/>
+	<label for="drawBalls">Draw Balls</label>
+	<input type="checkbox" id="drawBalls" checked/>
+	<label for="drawLines">Draw Lines</label>
+	<input type="checkbox" id="drawLines" checked/>
+</div>
 
 <canvas width="900" height="500" id="canvas">Your browswer doesn't support canvas.</canvas>
 
 <script src="../lib/utils.js" type="text/javascript"></script>
 <script src="../lib/ball.js"></script>
-<script type="text/javascript" lang="javascript" src='springWave.js'>
+<script type="text/javascript" lang="javascript" src='springWave.js'></script>
 
-
-</script>
 
 </body>
 </html>
